@@ -1,0 +1,10 @@
+{
+  "users": [
+    {
+      "username": "demo",
+      "password": "demo123",
+      "hwid": "",
+      "isAdmin": true
+    }
+  ]
+}

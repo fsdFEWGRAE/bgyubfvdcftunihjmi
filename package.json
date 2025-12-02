@@ -1,0 +1,20 @@
+{
+  "name": "glom-auth-api",
+  "version": "1.0.1",
+  "description": "Simple HWID + login API for GLOM Tweek (file-based JSON storage, no database).",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "glom",
+    "tweek",
+    "hwid",
+    "auth"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
