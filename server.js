@@ -41,27 +41,36 @@ function saveUsers(users) {
 }
 
 // =========================================================
-//  LOGIN ROUTE
+//  LOGIN ROUTE (FINAL VERSION FOR GLOM Tweek)
 // =========================================================
 app.post("/login", (req, res) => {
     let { username, password, hwid } = req.body;
     let users = loadUsers();
 
     let user = users.find(u => u.username === username);
-    if (!user) return res.send("invalid");
+    if (!user) return res.send("invalid");       // user not found
 
-    if (user.password !== password) return res.send("invalid");
+    if (user.password !== password) return res.send("invalid"); // wrong pass
 
-    // HWID Lock
+    // HWID LOCK
     if (user.hwid === "0") {
-        // first login, bind hwid
+        // first login → bind hwid
         user.hwid = hwid;
         saveUsers(users);
-    } else if (user.hwid !== hwid) {
-        return res.send("hwid_mismatch");
+    } 
+    else if (user.hwid !== hwid) {
+        return res.send("hwid_mismatch"); // hwid mismatch
     }
 
-    return res.send(`success|${user.admin ? "admin" : "user"}`);
+    // ============================
+    //  SUCCESS RESPONSE (IMPORTANT)
+    // ============================
+    if (user.admin) {
+        // التويك يبحث عن هذا بالضبط: "is_admin":true
+        return res.send('{"status":"success","is_admin":true}');
+    } else {
+        return res.send('{"status":"success","is_admin":false}');
+    }
 });
 
 // =========================================================
