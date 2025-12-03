@@ -6,7 +6,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // =========================================================
-//  LOAD USERS FROM FILE
+//  USERS FILE
 //  Format per line:
 //  username|password|hwid|isadmin
 // =========================================================
@@ -41,36 +41,31 @@ function saveUsers(users) {
 }
 
 // =========================================================
-//  LOGIN ROUTE (FINAL VERSION FOR GLOM Tweek)
+//  LOGIN (HWID LOCK FOR ALL ACCOUNTS)
 // =========================================================
 app.post("/login", (req, res) => {
     let { username, password, hwid } = req.body;
     let users = loadUsers();
 
     let user = users.find(u => u.username === username);
-    if (!user) return res.send("invalid");       // user not found
+    if (!user) return res.send("invalid"); // no user found
 
     if (user.password !== password) return res.send("invalid"); // wrong pass
 
-    // HWID LOCK
+    // ============================
+    // HWID LOCK FOR ALL ACCOUNTS
+    // ============================
     if (user.hwid === "0") {
-        // first login → bind hwid
+        // first login → bind HWID
         user.hwid = hwid;
         saveUsers(users);
-    } 
-    else if (user.hwid !== hwid) {
-        return res.send("hwid_mismatch"); // hwid mismatch
+    } else if (user.hwid !== hwid) {
+        return res.send("hwid_mismatch"); // different device
     }
 
-    // ============================
-    //  SUCCESS RESPONSE (IMPORTANT)
-    // ============================
-    if (user.admin) {
-        // التويك يبحث عن هذا بالضبط: "is_admin":true
-        return res.send('{"status":"success","is_admin":true}');
-    } else {
-        return res.send('{"status":"success","is_admin":false}');
-    }
+    // SUCCESS RESPONSE
+    let isAdmin = user.admin ? "true" : "false";
+    return res.send(`{"status":"success","is_admin":${isAdmin}}`);
 });
 
 // =========================================================
@@ -87,7 +82,7 @@ function checkAdmin(req, res) {
 }
 
 // =========================================================
-//  LIST USERS
+//  ADMIN: LIST USERS
 // =========================================================
 app.post("/admin/users", (req, res) => {
     let users = checkAdmin(req, res);
@@ -101,7 +96,7 @@ app.post("/admin/users", (req, res) => {
 });
 
 // =========================================================
-//  SAVE USER (ADD/UPDATE)
+//  ADMIN: SAVE USER (ADD OR UPDATE)
 // =========================================================
 app.post("/admin/save_user", (req, res) => {
     let users = checkAdmin(req, res);
@@ -131,7 +126,7 @@ app.post("/admin/save_user", (req, res) => {
 });
 
 // =========================================================
-//  DELETE USER
+//  ADMIN: DELETE USER
 // =========================================================
 app.post("/admin/delete_user", (req, res) => {
     let users = checkAdmin(req, res);
@@ -148,7 +143,7 @@ app.post("/admin/delete_user", (req, res) => {
 });
 
 // =========================================================
-//  RESET HWID
+//  ADMIN: RESET HWID
 // =========================================================
 app.post("/admin/reset_hwid", (req, res) => {
     let users = checkAdmin(req, res);
@@ -166,7 +161,7 @@ app.post("/admin/reset_hwid", (req, res) => {
 });
 
 // =========================================================
-//  SERVER START
+//  START SERVER
 // =========================================================
 app.listen(3000, () => {
     console.log("GLOM API running on port 3000");
